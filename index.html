@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analisis SPM JPN Kedah 2025 – Unit Sains & Matematik</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #F4F6FA; color: #1a1a1a; padding: 20px; min-height: 100vh; }
+  .hdr { background: #0C447C; color: #E6F1FB; padding: 20px 24px 16px; border-radius: 12px; margin-bottom: 16px; }
+  .hdr-sub { font-size: 11px; color: #85B7EB; margin-top: 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .hdr-title { font-size: 17px; font-weight: 600; color: #fff; margin-top: 6px; line-height: 1.4; }
+  .hdr-badge { display: inline-block; background: #185FA5; color: #B5D4F4; font-size: 11px; padding: 3px 10px; border-radius: 99px; margin-top: 8px; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .filter-label { font-size: 12px; color: #5F5E5A; margin-right: 4px; }
+  .filter-btn { font-size: 12px; padding: 5px 14px; border: 1px solid #ccc; border-radius: 99px; background: #fff; color: #444; cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { background: #f0f0f0; }
+  .filter-btn.active { background: #0C447C; color: #E6F1FB; border-color: #0C447C; font-weight: 600; }
+  .filter-select { font-size: 12px; padding: 5px 10px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #222; cursor: pointer; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+  .kpi { background: #fff; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .kpi-label { font-size: 11px; color: #888; margin-bottom: 6px; }
+  .kpi-val { font-size: 24px; font-weight: 600; color: #1a1a1a; }
+  .kpi-sub { font-size: 11px; color: #aaa; margin-top: 3px; }
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .chart-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .chart-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px; }
+  .tbl-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); overflow-x: auto; }
+  .tbl-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th { background: #F4F6FA; color: #666; padding: 7px 10px; text-align: left; font-weight: 600; font-size: 11px; }
+  tbody tr { border-top: 1px solid #f0f0f0; }
+  tbody tr:hover { background: #f9fafb; }
+  tbody td { padding: 7px 10px; color: #1a1a1a; }
+  .pill { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+  .pill-good { background: #E1F5EE; color: #0F6E56; }
+  .pill-warn { background: #FAEEDA; color: #854F0B; }
+  .pill-bad { background: #FCEBEB; color: #A32D2D; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; font-size: 11px; color: #666; }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  @media (max-width: 640px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+  @media print {
+    body { background: #fff; padding: 10px; }
+    .filter-row { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-sub">Jabatan Pendidikan Negeri Kedah &bull; Unit Sains &amp; Matematik</div>
+  <div class="hdr-title">Analisis SPM bagi Sekolah Kelas Seliaan Negeri<br>JPN Kedah &mdash; Mata Pelajaran Sains &amp; Matematik</div>
+  <div class="hdr-badge">Peperiksaan SPM 2025</div>
+</div>
+
+<div class="filter-row">
+  <span class="filter-label">Paparan:</span>
+  <button class="filter-btn active" id="btn-all" onclick="setView('all')">Semua</button>
+  <button class="filter-btn" id="btn-school" onclick="setView('school')">Ikut Sekolah</button>
+  <button class="filter-btn" id="btn-subject" onclick="setView('subject')">Ikut Mata Pelajaran</button>
+  <select class="filter-select" id="sel-school" style="display:none" onchange="render()">
+    <option value="">-- Pilih Sekolah --</option>
+  </select>
+  <select class="filter-select" id="sel-subject" style="display:none" onchange="render()">
+    <option value="">-- Pilih Mata Pelajaran --</option>
+  </select>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="kpi-label">Jumlah Calon Duduki</div><div class="kpi-val" id="kpi-calon">—</div><div class="kpi-sub">keseluruhan</div></div>
+  <div class="kpi"><div class="kpi-label">Purata GPMP</div><div class="kpi-val" id="kpi-gpmp">—</div><div class="kpi-sub">lebih rendah = lebih baik</div></div>
+  <div class="kpi"><div class="kpi-label">Purata % Lulus</div><div class="kpi-val" id="kpi-lulus">—</div><div class="kpi-sub">peratus kelulusan</div></div>
+  <div class="kpi"><div class="kpi-label">Jumlah Pelajar A</div><div class="kpi-val" id="kpi-a">—</div><div class="kpi-sub">A+, A, A-</div></div>
+</div>
+
+<div class="charts-grid">
+  <div class="chart-card">
+    <div class="chart-title">GPMP Mengikut Sekolah <span style="font-weight:400;color:#888;font-size:11px">(terbaik ke lemah)</span></div>
+    <div class="legend">
+      <span><span class="legend-dot" style="background:#0F6E56"></span>Cemerlang (&le;2)</span>
+      <span><span class="legend-dot" style="background:#185FA5"></span>Baik (&le;4)</span>
+      <span><span class="legend-dot" style="background:#BA7517"></span>Sederhana (&le;6)</span>
+      <span><span class="legend-dot" style="background:#A32D2D"></span>Lemah (&gt;6)</span>
+    </div>
+    <div style="position:relative;width:100%;height:280px"><canvas id="chartSchool"></canvas></div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">% Lulus Mengikut Mata Pelajaran</div>
+    <div class="legend">
+      <span><span class="legend-dot" style="background:#0F6E56"></span>&ge;95%</span>
+      <span><span class="legend-dot" style="background:#185FA5"></span>&ge;80%</span>
+      <span><span class="legend-dot" style="background:#A32D2D"></span>&lt;80%</span>
+    </div>
+    <div style="position:relative;width:100%;height:280px"><canvas id="chartSubject"></canvas></div>
+  </div>
+</div>
+
+<div class="tbl-card">
+  <div class="tbl-title">Butiran Data <span id="tbl-count" style="font-weight:400;color:#888;font-size:11px"></span></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Nama Sekolah</th>
+        <th>Mata Pelajaran</th>
+        <th style="text-align:right">Bil. Duduki</th>
+        <th style="text-align:right">% Lulus</th>
+        <th style="text-align:right">% Gagal</th>
+        <th style="text-align:right">GPMP</th>
+        <th style="text-align:right">Jum. A</th>
+      </tr>
+    </thead>
+    <tbody id="tbl-body"></tbody>
+  </table>
+</div>
+
+<script>
+const RAW = [
+  {NamaSekolah:"SMK BALING",MP:"MATEMATIK",BilDuduki:142,Jum_A:76,pLulus:97.89,pGagal:2.11,GPMP:3.27},
+  {NamaSekolah:"SMK BALING",MP:"SAINS",BilDuduki:70,Jum_A:33,pLulus:100,pGagal:0,GPMP:2.97},
+  {NamaSekolah:"SMK BALING",MP:"FIZIK",BilDuduki:72,Jum_A:2,pLulus:95.83,pGagal:4.17,GPMP:6.35},
+  {NamaSekolah:"SMK BALING",MP:"KIMIA",BilDuduki:72,Jum_A:6,pLulus:94.44,pGagal:5.56,GPMP:5.89},
+  {NamaSekolah:"SMK BALING",MP:"BIOLOGI",BilDuduki:59,Jum_A:6,pLulus:98.31,pGagal:1.69,GPMP:5.49},
+  {NamaSekolah:"SMK BALING",MP:"MATEMATIK TAMBAHAN",BilDuduki:86,Jum_A:1,pLulus:47.67,pGagal:52.33,GPMP:7.69},
+  {NamaSekolah:"SEKOLAH KHAS BALING",MP:"MATEMATIK",BilDuduki:49,Jum_A:20,pLulus:100,pGagal:0,GPMP:3.59},
+  {NamaSekolah:"SEKOLAH KHAS BALING",MP:"SAINS",BilDuduki:30,Jum_A:16,pLulus:100,pGagal:0,GPMP:2.37},
+  {NamaSekolah:"SEKOLAH KHAS BALING",MP:"FIZIK",BilDuduki:19,Jum_A:0,pLulus:100,pGagal:0,GPMP:5.42},
+  {NamaSekolah:"SEKOLAH KHAS BALING",MP:"KIMIA",BilDuduki:19,Jum_A:0,pLulus:94.74,pGagal:5.26,GPMP:7.11},
+  {NamaSekolah:"SEKOLAH KHAS BALING",MP:"BIOLOGI",BilDuduki:19,Jum_A:0,pLulus:94.74,pGagal:5.26,GPMP:7.05},
+  {NamaSekolah:"SEKOLAH KHAS BALING",MP:"MATEMATIK TAMBAHAN",BilDuduki:19,Jum_A:0,pLulus:78.95,pGagal:21.05,GPMP:6.68},
+  {NamaSekolah:"SMK KULIM",MP:"MATEMATIK",BilDuduki:149,Jum_A:97,pLulus:97.32,pGagal:2.68,GPMP:2.56},
+  {NamaSekolah:"SMK KULIM",MP:"SAINS",BilDuduki:89,Jum_A:55,pLulus:100,pGagal:0,GPMP:2.33},
+  {NamaSekolah:"SMK KULIM",MP:"FIZIK",BilDuduki:60,Jum_A:14,pLulus:100,pGagal:0,GPMP:4.23},
+  {NamaSekolah:"SMK KULIM",MP:"KIMIA",BilDuduki:60,Jum_A:3,pLulus:100,pGagal:0,GPMP:5.57},
+  {NamaSekolah:"SMK KULIM",MP:"BIOLOGI",BilDuduki:23,Jum_A:3,pLulus:100,pGagal:0,GPMP:4.70},
+  {NamaSekolah:"SMK KULIM",MP:"MATEMATIK TAMBAHAN",BilDuduki:73,Jum_A:11,pLulus:91.78,pGagal:8.22,GPMP:5.40},
+  {NamaSekolah:"SMK SULTAN BADLISHAH",MP:"MATEMATIK",BilDuduki:155,Jum_A:136,pLulus:100,pGagal:0,GPMP:1.29},
+  {NamaSekolah:"SMK SULTAN BADLISHAH",MP:"SAINS",BilDuduki:28,Jum_A:21,pLulus:100,pGagal:0,GPMP:1.89},
+  {NamaSekolah:"SMK SULTAN BADLISHAH",MP:"FIZIK",BilDuduki:127,Jum_A:31,pLulus:99.21,pGagal:0.79,GPMP:4.08},
+  {NamaSekolah:"SMK SULTAN BADLISHAH",MP:"KIMIA",BilDuduki:127,Jum_A:48,pLulus:100,pGagal:0,GPMP:3.39},
+  {NamaSekolah:"SMK SULTAN BADLISHAH",MP:"BIOLOGI",BilDuduki:82,Jum_A:22,pLulus:100,pGagal:0,GPMP:4.09},
+  {NamaSekolah:"SMK SULTAN BADLISHAH",MP:"MATEMATIK TAMBAHAN",BilDuduki:127,Jum_A:33,pLulus:82.68,pGagal:17.32,GPMP:5.17},
+  {NamaSekolah:"SMK IBRAHIM",MP:"MATEMATIK",BilDuduki:158,Jum_A:147,pLulus:100,pGagal:0,GPMP:0.80},
+  {NamaSekolah:"SMK IBRAHIM",MP:"SAINS",BilDuduki:24,Jum_A:19,pLulus:100,pGagal:0,GPMP:1.67},
+  {NamaSekolah:"SMK IBRAHIM",MP:"FIZIK",BilDuduki:133,Jum_A:47,pLulus:100,pGagal:0,GPMP:3.58},
+  {NamaSekolah:"SMK IBRAHIM",MP:"KIMIA",BilDuduki:134,Jum_A:43,pLulus:100,pGagal:0,GPMP:4.10},
+  {NamaSekolah:"SMK IBRAHIM",MP:"BIOLOGI",BilDuduki:110,Jum_A:42,pLulus:99.09,pGagal:0.91,GPMP:3.84},
+  {NamaSekolah:"SMK IBRAHIM",MP:"MATEMATIK TAMBAHAN",BilDuduki:145,Jum_A:33,pLulus:77.93,pGagal:22.07,GPMP:5.33},
+  {NamaSekolah:"SMK JITRA",MP:"MATEMATIK",BilDuduki:134,Jum_A:114,pLulus:100,pGagal:0,GPMP:1.20},
+  {NamaSekolah:"SMK JITRA",MP:"SAINS",BilDuduki:46,Jum_A:45,pLulus:100,pGagal:0,GPMP:0.89},
+  {NamaSekolah:"SMK JITRA",MP:"FIZIK",BilDuduki:88,Jum_A:51,pLulus:100,pGagal:0,GPMP:2.38},
+  {NamaSekolah:"SMK JITRA",MP:"KIMIA",BilDuduki:88,Jum_A:46,pLulus:100,pGagal:0,GPMP:2.64},
+  {NamaSekolah:"SMK JITRA",MP:"BIOLOGI",BilDuduki:88,Jum_A:49,pLulus:100,pGagal:0,GPMP:2.67},
+  {NamaSekolah:"SMK JITRA",MP:"MATEMATIK TAMBAHAN",BilDuduki:89,Jum_A:21,pLulus:92.13,pGagal:7.87,GPMP:4.64},
+  {NamaSekolah:"SMK SULTANAH ASMA",MP:"MATEMATIK",BilDuduki:123,Jum_A:95,pLulus:100,pGagal:0,GPMP:1.89},
+  {NamaSekolah:"SMK SULTANAH ASMA",MP:"SAINS",BilDuduki:47,Jum_A:31,pLulus:100,pGagal:0,GPMP:2.11},
+  {NamaSekolah:"SMK SULTANAH ASMA",MP:"FIZIK",BilDuduki:76,Jum_A:24,pLulus:100,pGagal:0,GPMP:4.21},
+  {NamaSekolah:"SMK SULTANAH ASMA",MP:"KIMIA",BilDuduki:76,Jum_A:29,pLulus:100,pGagal:0,GPMP:3.86},
+  {NamaSekolah:"SMK SULTANAH ASMA",MP:"BIOLOGI",BilDuduki:54,Jum_A:27,pLulus:100,pGagal:0,GPMP:3.09},
+  {NamaSekolah:"SMK SULTANAH ASMA",MP:"MATEMATIK TAMBAHAN",BilDuduki:86,Jum_A:18,pLulus:73.26,pGagal:26.74,GPMP:5.59},
+  {NamaSekolah:"KOLEJ SULTAN ABDUL HAMID",MP:"MATEMATIK",BilDuduki:156,Jum_A:95,pLulus:98.72,pGagal:1.28,GPMP:2.68},
+  {NamaSekolah:"KOLEJ SULTAN ABDUL HAMID",MP:"SAINS",BilDuduki:72,Jum_A:27,pLulus:100,pGagal:0,GPMP:3.31},
+  {NamaSekolah:"KOLEJ SULTAN ABDUL HAMID",MP:"FIZIK",BilDuduki:84,Jum_A:34,pLulus:100,pGagal:0,GPMP:3.27},
+  {NamaSekolah:"KOLEJ SULTAN ABDUL HAMID",MP:"KIMIA",BilDuduki:84,Jum_A:36,pLulus:98.81,pGagal:1.19,GPMP:3.45},
+  {NamaSekolah:"KOLEJ SULTAN ABDUL HAMID",MP:"BIOLOGI",BilDuduki:52,Jum_A:21,pLulus:98.08,pGagal:1.92,GPMP:3.50},
+  {NamaSekolah:"KOLEJ SULTAN ABDUL HAMID",MP:"MATEMATIK TAMBAHAN",BilDuduki:83,Jum_A:15,pLulus:79.52,pGagal:20.48,GPMP:5.45},
+  {NamaSekolah:"SMK DATUK SYED AHMAD",MP:"MATEMATIK",BilDuduki:181,Jum_A:104,pLulus:99.45,pGagal:0.55,GPMP:2.81},
+  {NamaSekolah:"SMK DATUK SYED AHMAD",MP:"SAINS",BilDuduki:145,Jum_A:103,pLulus:100,pGagal:0,GPMP:1.98},
+  {NamaSekolah:"SMK DATUK SYED AHMAD",MP:"FIZIK",BilDuduki:36,Jum_A:15,pLulus:100,pGagal:0,GPMP:3.61},
+  {NamaSekolah:"SMK DATUK SYED AHMAD",MP:"KIMIA",BilDuduki:36,Jum_A:12,pLulus:100,pGagal:0,GPMP:4.00},
+  {NamaSekolah:"SMK DATUK SYED AHMAD",MP:"BIOLOGI",BilDuduki:20,Jum_A:13,pLulus:100,pGagal:0,GPMP:2.30},
+  {NamaSekolah:"SMK DATUK SYED AHMAD",MP:"MATEMATIK TAMBAHAN",BilDuduki:54,Jum_A:9,pLulus:92.59,pGagal:7.41,GPMP:5.20},
+  {NamaSekolah:"SMK SIK",MP:"MATEMATIK",BilDuduki:140,Jum_A:73,pLulus:97.14,pGagal:2.86,GPMP:3.41},
+  {NamaSekolah:"SMK SIK",MP:"SAINS",BilDuduki:69,Jum_A:26,pLulus:100,pGagal:0,GPMP:3.09},
+  {NamaSekolah:"SMK SIK",MP:"FIZIK",BilDuduki:71,Jum_A:8,pLulus:100,pGagal:0,GPMP:4.66},
+  {NamaSekolah:"SMK SIK",MP:"KIMIA",BilDuduki:71,Jum_A:11,pLulus:100,pGagal:0,GPMP:5.24},
+  {NamaSekolah:"SMK SIK",MP:"BIOLOGI",BilDuduki:48,Jum_A:7,pLulus:100,pGagal:0,GPMP:4.81},
+  {NamaSekolah:"SMK SIK",MP:"MATEMATIK TAMBAHAN",BilDuduki:71,Jum_A:3,pLulus:59.15,pGagal:40.85,GPMP:7.06}
+];
+
+const SCHOOLS = [...new Set(RAW.map(d=>d.NamaSekolah))].sort();
+const SUBJECTS = ["MATEMATIK","SAINS","FIZIK","KIMIA","BIOLOGI","MATEMATIK TAMBAHAN"];
+const SHORT = {
+  "KOLEJ SULTAN ABDUL HAMID":"KSAH","SMK JITRA":"JITRA","SMK BALING":"BALING","SMK SIK":"SIK",
+  "SMK SULTANAH ASMA":"S.ASMA","SMK SULTAN BADLISHAH":"S.BADLISHAH","SMK KULIM":"KULIM",
+  "SMK IBRAHIM":"IBRAHIM","SMK DATUK SYED AHMAD":"D.SYED AHMAD","SEKOLAH KHAS BALING":"SK BALING"
+};
+
+const selSchool = document.getElementById('sel-school');
+const selSubject = document.getElementById('sel-subject');
+SCHOOLS.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; selSchool.appendChild(o); });
+SUBJECTS.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; selSubject.appendChild(o); });
+
+let view='all', chartSchool=null, chartSubject=null;
+
+function setView(v) {
+  view=v;
+  ['all','school','subject'].forEach(x=>document.getElementById('btn-'+x).classList.toggle('active',x===v));
+  selSchool.style.display=v==='school'?'inline-block':'none';
+  selSubject.style.display=v==='subject'?'inline-block':'none';
+  render();
+}
+
+function getFiltered() {
+  if(view==='school'&&selSchool.value) return RAW.filter(d=>d.NamaSekolah===selSchool.value);
+  if(view==='subject'&&selSubject.value) return RAW.filter(d=>d.MP===selSubject.value);
+  return RAW;
+}
+
+function avg(arr,fn){const v=arr.map(fn).filter(x=>!isNaN(x));return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;}
+function sum(arr,fn){return arr.map(fn).filter(x=>!isNaN(x)).reduce((a,b)=>a+b,0);}
+
+function render() {
+  const data=getFiltered();
+  document.getElementById('kpi-calon').textContent=sum(data,d=>d.BilDuduki).toLocaleString();
+  document.getElementById('kpi-gpmp').textContent=avg(data,d=>d.GPMP).toFixed(2);
+  document.getElementById('kpi-lulus').textContent=avg(data,d=>d.pLulus).toFixed(1)+'%';
+  document.getElementById('kpi-a').textContent=sum(data,d=>d.Jum_A).toLocaleString();
+
+  const bySchool={};
+  RAW.forEach(d=>{if(!bySchool[d.NamaSekolah])bySchool[d.NamaSekolah]=[];bySchool[d.NamaSekolah].push(d);});
+  const schoolData=Object.entries(bySchool).map(([s,rows])=>({s,gpmp:avg(rows,d=>d.GPMP)})).sort((a,b)=>a.gpmp-b.gpmp);
+  const schoolLabels=schoolData.map(x=>SHORT[x.s]||x.s);
+  const schoolGPMP=schoolData.map(x=>+x.gpmp.toFixed(2));
+  const schoolColors=schoolGPMP.map(g=>g<=2?'#0F6E56':g<=4?'#185FA5':g<=6?'#BA7517':'#A32D2D');
+
+  if(chartSchool)chartSchool.destroy();
+  chartSchool=new Chart(document.getElementById('chartSchool'),{
+    type:'bar',
+    data:{labels:schoolLabels,datasets:[{label:'GPMP',data:schoolGPMP,backgroundColor:schoolColors,borderRadius:4,barPercentage:0.75}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'GPMP: '+ctx.parsed.y.toFixed(2)}}},
+      scales:{
+        x:{ticks:{font:{size:10},color:'#5F5E5A',maxRotation:35},grid:{display:false}},
+        y:{ticks:{font:{size:10},color:'#5F5E5A',callback:v=>v.toFixed(1)},grid:{color:'rgba(0,0,0,0.05)'},title:{display:true,text:'GPMP',font:{size:10},color:'#888780'}}
+      }
+    }
+  });
+
+  const bySubject={};
+  RAW.forEach(d=>{if(!bySubject[d.MP])bySubject[d.MP]=[];bySubject[d.MP].push(d);});
+  const subjectOrder=["MATEMATIK","SAINS","BIOLOGI","KIMIA","FIZIK","MATEMATIK TAMBAHAN"];
+  const subData=subjectOrder.filter(s=>bySubject[s]).map(s=>({s,pLulus:avg(bySubject[s],d=>d.pLulus)}));
+  const subLabels=subData.map(x=>x.s.replace('MATEMATIK TAMBAHAN','MAT. TAMBAHAN'));
+  const subVals=subData.map(x=>+x.pLulus.toFixed(1));
+  const subColors=subVals.map(v=>v>=95?'#0F6E56':v>=80?'#185FA5':'#A32D2D');
+
+  if(chartSubject)chartSubject.destroy();
+  chartSubject=new Chart(document.getElementById('chartSubject'),{
+    type:'bar',
+    data:{labels:subLabels,datasets:[{label:'% Lulus',data:subVals,backgroundColor:subColors,borderRadius:4,barPercentage:0.7}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'% Lulus: '+ctx.parsed.y.toFixed(1)+'%'}}},
+      scales:{
+        x:{ticks:{font:{size:10},color:'#5F5E5A',maxRotation:30},grid:{display:false}},
+        y:{min:40,max:100,ticks:{font:{size:10},color:'#5F5E5A',callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.05)'},title:{display:true,text:'% Lulus',font:{size:10},color:'#888780'}}
+      }
+    }
+  });
+
+  const tbl=document.getElementById('tbl-body');
+  tbl.innerHTML='';
+  document.getElementById('tbl-count').textContent='('+data.length+' rekod)';
+  const sorted=[...data].sort((a,b)=>a.GPMP-b.GPMP);
+  sorted.forEach(d=>{
+    const pillClass=d.pLulus>=95?'pill-good':d.pLulus>=80?'pill-warn':'pill-bad';
+    tbl.innerHTML+=`<tr>
+      <td>${d.NamaSekolah}</td>
+      <td>${d.MP}</td>
+      <td style="text-align:right">${d.BilDuduki}</td>
+      <td style="text-align:right"><span class="pill ${pillClass}">${d.pLulus.toFixed(1)}%</span></td>
+      <td style="text-align:right">${d.pGagal.toFixed(1)}%</td>
+      <td style="text-align:right;font-weight:600">${d.GPMP.toFixed(2)}</td>
+      <td style="text-align:right">${d.Jum_A}</td>
+    </tr>`;
+  });
+}
+
+render();
+</script>
+</body>
+</html>
